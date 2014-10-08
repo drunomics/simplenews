@@ -1128,7 +1128,7 @@ function simplenews_simplenews_subscription_operations() {
     ),
     'delete' => array(
       'label' => t('Delete'),
-      'callback' => 'simplenews_subscription_delete_multiple',
+      'callback' => 'simplenews_subscriber_delete_multiple',
     ),
   );
   return $operations;
