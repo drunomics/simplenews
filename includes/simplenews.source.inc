@@ -807,7 +807,7 @@ class SimplenewsSourceEntity implements SimplenewsSourceEntityInterface {
       $field = field_info_field($field_name);
       if ($field['type'] == 'file' && isset($build[$field_name])) {
 
-        if ($items = field_get_items('node', $this->node, $field_name)) {
+        if ($items = field_get_items($this->getEntityType(), $this->getEntity(), $field_name)) {
           foreach ($items as $item) {
             $fids[] = $item['fid'];
           }

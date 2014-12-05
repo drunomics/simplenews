@@ -1406,6 +1406,17 @@ class SimpleNewsAdministrationTestCase extends SimplenewsTestCase {
     // Limit list to subscribers of the first newsletter only.
     reset($groups);
     $first = key($groups);
+
+    // Create a very basic node for the first newsletter's issue.
+    $first_node = new stdClass();
+    $first_node->type = 'simplenews';
+    $first_node->title = $this->randomName();
+    $first_node->uid = 0;
+    $first_node->status = 1;
+    $first_node->language = LANGUAGE_NONE;
+    simplenews_issue_newsletter_id($first_node, $first);
+    node_save($first_node);
+
     // Build a flat list of the subscribers of this list.
     $subscribers_flat = array_merge($subscribers[$first], $subscribers['all']);
 
@@ -1526,7 +1537,7 @@ class SimpleNewsAdministrationTestCase extends SimplenewsTestCase {
     // Make sure the user is subscribed to the first newsletter_id.
     simplenews_subscribe($user_mail, $first, FALSE);
     module_load_include('inc', 'simplenews', 'includes/simplenews.admin');
-    $before_count = simplenews_count_subscriptions($first);
+    $before_count = simplenews_count_subscriptions($first_node);
 
     // Block the user.
     user_save(clone $user, array('status' => 0));
@@ -1535,7 +1546,7 @@ class SimpleNewsAdministrationTestCase extends SimplenewsTestCase {
 
     // Verify updated subscriptions count.
     drupal_static_reset('simplenews_count_subscriptions');
-    $after_count = simplenews_count_subscriptions($first);
+    $after_count = simplenews_count_subscriptions($first_node);
     $this->assertEqual($before_count - 1, $after_count, t('Blocked users are not counted in subscription count.'));
 
     // Test mass subscribe with previously unsubscribed users.
