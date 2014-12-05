@@ -183,7 +183,7 @@ function simplenews_admin_issues() {
   module_load_include('inc', 'simplenews', 'includes/simplenews.mail');
   $categories = simplenews_newsletter_list();
   foreach (node_load_multiple($nids) as $node) {
-    $subscriber_count = simplenews_count_subscriptions(simplenews_issue_newsletter_id($node));
+    $subscriber_count = simplenews_count_subscriptions($node);
     $pending_count = simplenews_count_spool(array('entity_id' => $node->nid, 'entity_type' => 'node'));
     $send_status = simplenews_issue_status($node) == SIMPLENEWS_STATUS_SEND_PENDING ? $subscriber_count - $pending_count : theme('simplenews_status', array('source' => 'sent', 'status' => simplenews_issue_status($node)));
 
@@ -1653,25 +1653,28 @@ function simplenews_build_subscription_filter_query(SelectQueryInterface $query)
 /**
  * Count number of subscribers per newsletter list.
  *
- * @param $newsletter_id
- *   The newsletter id.
+ * @param $node
+ *   The newsletter issue node.
  *
  * @return
  *   Number of subscribers.
  */
-function simplenews_count_subscriptions($newsletter_id) {
+function simplenews_count_subscriptions($node) {
   $subscription_count = &drupal_static(__FUNCTION__);
 
-  if (isset($subscription_count[$newsletter_id])) {
-    return $subscription_count[$newsletter_id];
+  if (isset($subscription_count[$node->nid])) {
+    return $subscription_count[$node->nid];
   }
-  $query = db_select('simplenews_subscription', 'ss');
-  $query->leftJoin('simplenews_subscriber', 'sn', 'sn.snid = ss.snid');
-  $query->condition('newsletter_id', $newsletter_id)
-    ->condition('sn.activated', 1)
-    ->condition('status', SIMPLENEWS_SUBSCRIPTION_STATUS_SUBSCRIBED);
-  $subscription_count[$newsletter_id] = $query->countQuery()->execute()->fetchField();
-  return $subscription_count[$newsletter_id];
+
+  $newsletter = simplenews_newsletter_load(simplenews_issue_newsletter_id($node));
+  $handler = simplenews_issue_handler($node);
+  $handler_settings = simplenews_issue_handler_settings($node);
+  $recipient_handler = simplenews_get_recipient_handler($newsletter, $handler, $handler_settings);
+
+  $select = $recipient_handler->buildRecipientCountQuery();
+  $subscription_count[$node->nid] = $select->execute()->fetchField();
+
+  return $subscription_count[$node->nid];
 }
 
 /**
