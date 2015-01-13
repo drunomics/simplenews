@@ -2046,7 +2046,7 @@ function simplenews_newsletter_get_visible($conditions = array()) {
     $query->propertyCondition($key, $value);
   }
   $result = $query->execute();
-  return isset($result['simplenews_newsletter']) ? simplenews_newsletter_load_multiple(array_keys($result['simplenews_newsletter'])) : NULL;
+  return isset($result['simplenews_newsletter']) ? simplenews_newsletter_load_multiple(array_keys($result['simplenews_newsletter'])) : array();
 }
 
 /**
@@ -2064,7 +2064,7 @@ function simplenews_newsletter_get_all() {
     ->entityCondition('entity_type', 'simplenews_newsletter')
     ->propertyOrderBy('weight')
     ->execute();
-  return isset($result['simplenews_newsletter']) ? simplenews_newsletter_load_multiple(array_keys($result['simplenews_newsletter'])) : NULL;
+  return isset($result['simplenews_newsletter']) ? simplenews_newsletter_load_multiple(array_keys($result['simplenews_newsletter'])) : array();
 }
 
 /**
