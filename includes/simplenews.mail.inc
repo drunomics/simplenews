@@ -181,11 +181,19 @@ function simplenews_send_source(SimplenewsSourceInterface $source) {
       'error' => FALSE,
     );
   }
-  else {
+  elseif (isset($message['result']) && !$message['result']) {
     // This error may be caused by faulty mailserver configuration or overload.
     // Mark "pending" to keep trying.
     $result = array(
       'status' => SIMPLENEWS_SPOOL_PENDING,
+      'error' => TRUE,
+    );
+  }
+  // If the result is NULL, sending has been aborted by some module. Does do
+  // not retry and accept that fail.
+  else {
+    $result = array(
+      'status' => SIMPLENEWS_SPOOL_DONE,
       'error' => TRUE,
     );
   }
